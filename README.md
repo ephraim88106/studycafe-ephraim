@@ -94,6 +94,29 @@
             </div>
         </div>
 
+        <div id="page-parking-info" class="bg-white rounded-b-2xl shadow-lg p-6 hidden">
+            <button onclick="goToPage('type')" class="flex items-center text-indigo-600 hover:text-indigo-800 mb-4">
+                <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                </svg>
+                뒤로가기
+            </button>
+            <div class="bg-blue-50 border-l-4 border-blue-500 p-6 rounded-lg">
+                <div class="flex items-start">
+                    <span class="text-4xl mr-4">🅿️</span>
+                    <div>
+                        <h3 class="text-xl font-bold text-blue-900 mb-3">부평삼산점 주차 안내</h3>
+                        <p class="text-gray-700 text-lg leading-relaxed">
+                            아파트 상가에 주차가 가능하지만, 안되는 경우도 있으니 참고해주시기 바랍니다.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <button onclick="goToPage('branch')" class="w-full mt-6 bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white font-semibold py-3 px-6 rounded-lg shadow-md transition-all">
+                처음으로 돌아가기
+            </button>
+        </div>
+
         <div class="text-center mt-6 text-gray-600 text-sm">
             <p>문의하신 내용은 실시간으로 관리자에게 전달됩니다</p>
             <p class="mt-1">빠른 시일 내에 답변드리겠습니다 😊</p>
@@ -117,6 +140,7 @@
             { id: 'report', title: '학습 방해 행위 신고', icon: '🚨', excludeBranches: [] },
             { id: 'temperature', title: '온도 조절 문의', icon: '🌡️', excludeBranches: [] },
             { id: 'parking', title: '주차 문의', icon: '🚗', excludeBranches: ['bupyeong'] },
+            { id: 'parking_info', title: '주차 안내', icon: '🅿️', onlyBranches: ['bupyeong'], isInfo: true },
             { id: 'other', title: '그 외 기타 문의', icon: '💬', excludeBranches: [] }
         ];
 
@@ -124,6 +148,7 @@
             document.getElementById('page-branch').classList.add('hidden');
             document.getElementById('page-type').classList.add('hidden');
             document.getElementById('page-form').classList.add('hidden');
+            document.getElementById('page-parking-info').classList.add('hidden');
             
             if (page === 'branch') {
                 document.getElementById('page-branch').classList.remove('hidden');
@@ -140,7 +165,13 @@
                 document.getElementById('success-message').classList.add('hidden');
             } else if (page === 'form') {
                 document.getElementById('page-form').classList.remove('hidden');
+            } else if (page === 'parking-info') {
+                document.getElementById('page-parking-info').classList.remove('hidden');
             }
+        }
+
+        function showParkingInfo() {
+            goToPage('parking-info');
         }
 
         function selectBranch(id, name, icon) {
@@ -154,6 +185,7 @@
             for (var i = 0; i < inquiryTypes.length; i++) {
                 var type = inquiryTypes[i];
                 var shouldExclude = false;
+                var shouldInclude = true;
                 
                 for (var j = 0; j < type.excludeBranches.length; j++) {
                     if (type.excludeBranches[j] === id) {
@@ -162,7 +194,17 @@
                     }
                 }
                 
-                if (shouldExclude) {
+                if (type.onlyBranches && type.onlyBranches.length > 0) {
+                    shouldInclude = false;
+                    for (var k = 0; k < type.onlyBranches.length; k++) {
+                        if (type.onlyBranches[k] === id) {
+                            shouldInclude = true;
+                            break;
+                        }
+                    }
+                }
+                
+                if (shouldExclude || !shouldInclude) {
                     continue;
                 }
                 
@@ -170,8 +212,14 @@
                 button.setAttribute('data-type-id', type.id);
                 button.setAttribute('data-type-title', type.title);
                 button.setAttribute('data-type-icon', type.icon);
+                button.setAttribute('data-is-info', type.isInfo ? 'true' : 'false');
                 button.onclick = function() {
-                    selectType(this.getAttribute('data-type-id'), this.getAttribute('data-type-title'), this.getAttribute('data-type-icon'));
+                    var isInfo = this.getAttribute('data-is-info') === 'true';
+                    if (isInfo) {
+                        showParkingInfo();
+                    } else {
+                        selectType(this.getAttribute('data-type-id'), this.getAttribute('data-type-title'), this.getAttribute('data-type-icon'));
+                    }
                 };
                 button.className = 'w-full p-4 bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white rounded-xl shadow-md transition-all transform hover:scale-105 flex items-center justify-between';
                 button.innerHTML = '<span class="text-lg font-medium">' + type.title + '</span><span class="text-2xl">' + type.icon + '</span>';
