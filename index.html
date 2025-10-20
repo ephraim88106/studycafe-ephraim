@@ -191,46 +191,30 @@
             
             for (var i = 0; i < inquiryTypes.length; i++) {
                 var type = inquiryTypes[i];
-                var shouldExclude = false;
-                var shouldInclude = true;
                 
-                for (var j = 0; j < type.excludeBranches.length; j++) {
-                    if (type.excludeBranches[j] === id) {
-                        shouldExclude = true;
-                        break;
-                    }
-                }
-                
-                if (type.onlyBranches && type.onlyBranches.length > 0) {
-                    shouldInclude = false;
-                    for (var k = 0; k < type.onlyBranches.length; k++) {
-                        if (type.onlyBranches[k] === id) {
-                            shouldInclude = true;
-                            break;
-                        }
-                    }
-                }
-                
-                if (shouldExclude || !shouldInclude) {
+                // 제외할 지점 체크
+                if (type.excludeBranches && type.excludeBranches.indexOf(id) !== -1) {
                     continue;
                 }
                 
-                var button = document.createElement('button');
-                button.setAttribute('data-type-id', type.id);
-                button.setAttribute('data-type-title', type.title);
-                button.setAttribute('data-type-icon', type.icon);
-                button.setAttribute('data-is-info', type.isInfo ? 'true' : 'false');
-                button.onclick = function() {
-                    var isInfo = this.getAttribute('data-is-info') === 'true';
-                    if (isInfo) {
-                        goToPage('parking-info');
-                    } else {
-                        selectType(this.getAttribute('data-type-id'), this.getAttribute('data-type-title'), this.getAttribute('data-type-icon'));
-                    }
-                };
-                button.className = 'w-full p-4 bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white rounded-xl shadow-md transition-all transform hover:scale-105 flex items-center justify-between';
-                button.innerHTML = '<span class="text-lg font-medium">' + type.title + '</span><span class="text-2xl">' + type.icon + '</span>';
-                typesContainer.appendChild(button);
+                // 특정 지점만 표시
+                if (type.onlyBranches && type.onlyBranches.indexOf(id) === -1) {
+                    continue;
+                }
+                
+                (function(currentType) {
+                    var button = document.createElement('button');
+                    button.onclick = function() {
+                        if (currentType.isInfo) {
+                            goToPage('parking-info');
+                        } else {
+                            selectType(currentType.id, currentType.title, currentType.icon);
+                        }
+                    };
+                    button.className = 'w-full p-4 bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white rounded-xl shadow-md transition-all transform hover:scale-105 flex items-center justify-between';
+                    button.innerHTML = '<span class="text-lg font-medium">' + currentType.title + '</span><span class="text-2xl">' + currentType.icon + '</span>';
+                    typesContainer.appendChild(button);
+                })(type);
             }
             
             goToPage('type');
