@@ -202,19 +202,23 @@
                     continue;
                 }
                 
-                (function(currentType) {
-                    var button = document.createElement('button');
+                var button = document.createElement('button');
+                button.className = 'w-full p-4 bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white rounded-xl shadow-md transition-all transform hover:scale-105 flex items-center justify-between';
+                button.innerHTML = '<span class="text-lg font-medium">' + type.title + '</span><span class="text-2xl">' + type.icon + '</span>';
+                
+                if (type.isInfo) {
                     button.onclick = function() {
-                        if (currentType.isInfo) {
-                            goToPage('parking-info');
-                        } else {
-                            selectType(currentType.id, currentType.title, currentType.icon);
-                        }
+                        goToPage('parking-info');
                     };
-                    button.className = 'w-full p-4 bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white rounded-xl shadow-md transition-all transform hover:scale-105 flex items-center justify-between';
-                    button.innerHTML = '<span class="text-lg font-medium">' + currentType.title + '</span><span class="text-2xl">' + currentType.icon + '</span>';
-                    typesContainer.appendChild(button);
-                })(type);
+                } else {
+                    button.onclick = (function(typeId, typeTitle, typeIcon) {
+                        return function() {
+                            selectType(typeId, typeTitle, typeIcon);
+                        };
+                    })(type.id, type.title, type.icon);
+                }
+                
+                typesContainer.appendChild(button);
             }
             
             goToPage('type');
