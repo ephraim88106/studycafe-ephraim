@@ -51,6 +51,37 @@
             </div>
             <h2 class="text-xl font-semibold text-gray-800 mb-4">무엇을 도와드릴까요?</h2>
             <div id="inquiry-types" class="space-y-3"></div>
+            <button onclick="goToPage('branch')" class="w-full mt-4 bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold py-3 px-6 rounded-lg shadow-md transition-all">
+                취소
+            </button>
+        </div>
+
+        <div id="page-parking-info" class="bg-white rounded-b-2xl shadow-lg p-6 hidden">
+            <button onclick="goToPage('type')" class="flex items-center text-indigo-600 hover:text-indigo-800 mb-4">
+                <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                </svg>
+                뒤로가기
+            </button>
+            <div class="bg-blue-50 border-l-4 border-blue-500 p-6 rounded-lg">
+                <div class="flex items-start">
+                    <span class="text-4xl mr-4">🅿️</span>
+                    <div>
+                        <h3 class="text-xl font-bold text-blue-900 mb-3">부평삼산점 주차 안내</h3>
+                        <p class="text-gray-700 text-lg leading-relaxed">
+                            아파트 상가에 주차가 가능하지만, 안되는 경우도 있으니 참고해주시기 바랍니다.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="flex gap-3 mt-6">
+                <button onclick="goToPage('type')" class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold py-3 px-6 rounded-lg shadow-md transition-all">
+                    취소
+                </button>
+                <button onclick="goToPage('branch')" class="flex-1 bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white font-semibold py-3 px-6 rounded-lg shadow-md transition-all">
+                    처음으로
+                </button>
+            </div>
         </div>
 
         <div id="page-form" class="bg-white rounded-b-2xl shadow-lg p-6 hidden">
@@ -91,30 +122,10 @@
                     </svg>
                     문의하기
                 </button>
+                <button onclick="goToPage('type')" class="w-full bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold py-3 px-6 rounded-lg shadow-md transition-all">
+                    취소
+                </button>
             </div>
-        </div>
-
-        <div id="page-parking-info" class="bg-white rounded-b-2xl shadow-lg p-6 hidden">
-            <button onclick="goToPage('type')" class="flex items-center text-indigo-600 hover:text-indigo-800 mb-4">
-                <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-                </svg>
-                뒤로가기
-            </button>
-            <div class="bg-blue-50 border-l-4 border-blue-500 p-6 rounded-lg">
-                <div class="flex items-start">
-                    <span class="text-4xl mr-4">🅿️</span>
-                    <div>
-                        <h3 class="text-xl font-bold text-blue-900 mb-3">부평삼산점 주차 안내</h3>
-                        <p class="text-gray-700 text-lg leading-relaxed">
-                            아파트 상가에 주차가 가능하지만, 안되는 경우도 있으니 참고해주시기 바랍니다.
-                        </p>
-                    </div>
-                </div>
-            </div>
-            <button onclick="goToPage('branch')" class="w-full mt-6 bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white font-semibold py-3 px-6 rounded-lg shadow-md transition-all">
-                처음으로 돌아가기
-            </button>
         </div>
 
         <div class="text-center mt-6 text-gray-600 text-sm">
@@ -138,9 +149,9 @@
         var inquiryTypes = [
             { id: 'room', title: '스터디룸 예약', icon: '📅', excludeBranches: [] },
             { id: 'report', title: '학습 방해 행위 신고', icon: '🚨', excludeBranches: [] },
-            { id: 'temperature', title: '온도 조절 문의', icon: '🌡️', excludeBranches: [] },
             { id: 'parking', title: '주차 문의', icon: '🚗', excludeBranches: ['bupyeong'] },
             { id: 'parking_info', title: '주차 안내', icon: '🅿️', onlyBranches: ['bupyeong'], isInfo: true },
+            { id: 'temperature', title: '온도 조절 문의', icon: '🌡️', excludeBranches: [] },
             { id: 'other', title: '그 외 기타 문의', icon: '💬', excludeBranches: [] }
         ];
 
@@ -168,10 +179,6 @@
             } else if (page === 'parking-info') {
                 document.getElementById('page-parking-info').classList.remove('hidden');
             }
-        }
-
-        function showParkingInfo() {
-            goToPage('parking-info');
         }
 
         function selectBranch(id, name, icon) {
@@ -216,7 +223,7 @@
                 button.onclick = function() {
                     var isInfo = this.getAttribute('data-is-info') === 'true';
                     if (isInfo) {
-                        showParkingInfo();
+                        goToPage('parking-info');
                     } else {
                         selectType(this.getAttribute('data-type-id'), this.getAttribute('data-type-title'), this.getAttribute('data-type-icon'));
                     }
@@ -259,11 +266,11 @@
             submitButton.innerHTML = '전송 중...';
             
             var message = '🏢 에브라임 스터디카페 문의\n\n';
-            message += '📍 지점: ' + state.selectedBranchName + '\n';
-            message += '📋 문의 유형: ' + state.selectedTypeIcon + ' ' + state.selectedTypeName + '\n';
-            message += '💺 좌석 번호: ' + seatNumber + '번\n';
-            message += '📝 문의 내용:\n' + inquiryContent + '\n\n';
-            message += '⏰ 접수 시간: ' + new Date().toLocaleString('ko-KR');
+            message = message + '📍 지점: ' + state.selectedBranchName + '\n';
+            message = message + '📋 문의 유형: ' + state.selectedTypeIcon + ' ' + state.selectedTypeName + '\n';
+            message = message + '💺 좌석 번호: ' + seatNumber + '번\n';
+            message = message + '📝 문의 내용:\n' + inquiryContent + '\n\n';
+            message = message + '⏰ 접수 시간: ' + new Date().toLocaleString('ko-KR');
             
             var url = 'https://api.telegram.org/bot' + TELEGRAM_BOT_TOKEN + '/sendMessage';
             var data = {
@@ -280,8 +287,8 @@
             })
             .then(function(response) {
                 var iconSvg = '<svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">';
-                iconSvg += '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>';
-                iconSvg += '</svg>';
+                iconSvg = iconSvg + '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>';
+                iconSvg = iconSvg + '</svg>';
                 
                 submitButton.disabled = false;
                 submitButton.innerHTML = iconSvg + '문의하기';
@@ -297,8 +304,8 @@
             })
             .catch(function(error) {
                 var iconSvg = '<svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">';
-                iconSvg += '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>';
-                iconSvg += '</svg>';
+                iconSvg = iconSvg + '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>';
+                iconSvg = iconSvg + '</svg>';
                 
                 console.error('Error:', error);
                 submitButton.disabled = false;
