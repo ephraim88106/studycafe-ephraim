@@ -147,12 +147,12 @@
         };
 
         var inquiryTypes = [
-            { id: 'room', title: '스터디룸 예약', icon: '📅', excludeBranches: [] },
-            { id: 'report', title: '학습 방해 행위 신고', icon: '🚨', excludeBranches: [] },
+            { id: 'room', title: '스터디룸 예약', icon: '📅' },
+            { id: 'report', title: '학습 방해 행위 신고', icon: '🚨' },
             { id: 'parking', title: '주차 문의', icon: '🚗', excludeBranches: ['bupyeong'] },
             { id: 'parking_info', title: '주차 안내', icon: '🅿️', onlyBranches: ['bupyeong'], isInfo: true },
-            { id: 'temperature', title: '온도 조절 문의', icon: '🌡️', excludeBranches: [] },
-            { id: 'other', title: '그 외 기타 문의', icon: '💬', excludeBranches: [] }
+            { id: 'temperature', title: '온도 조절 문의', icon: '🌡️' },
+            { id: 'other', title: '그 외 기타 문의', icon: '💬' }
         ];
 
         function goToPage(page) {
