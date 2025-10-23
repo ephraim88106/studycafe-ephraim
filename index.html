@@ -1,465 +1,329 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>에브라임 스터디카페 - 직영점 문의</title>
-  <meta name="description" content="에브라임 스터디카페 직영점 문의 및 예약 시스템" />
-  <meta name="referrer" content="same-origin" />
-  <meta http-equiv="X-Content-Type-Options" content="nosniff" />
-  <!-- NOTE: 운영에선 CSP를 서버 헤더로 설정 권장 -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <style>
-    .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
-    details > summary { cursor: pointer; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>에브라임 스터디카페 문의</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Malgun Gothic', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 500px;
+            width: 100%;
+            padding: 40px;
+        }
+
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+            animation: fadeIn 0.5s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h1 {
+            color: #667eea;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 24px;
+        }
+
+        h2 {
+            color: #764ba2;
+            text-align: center;
+            margin-bottom: 25px;
+            font-size: 20px;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 15px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            color: #333;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        .back-btn {
+            background: #6c757d;
+            margin-top: 10px;
+        }
+
+        .back-btn:hover {
+            box-shadow: 0 5px 15px rgba(108, 117, 125, 0.4);
+        }
+
+        .success-message {
+            text-align: center;
+            color: #333;
+            line-height: 1.8;
+        }
+
+        .phone-list {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .phone-item {
+            padding: 10px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .phone-item:last-child {
+            border-bottom: none;
+        }
+
+        .phone-item strong {
+            color: #667eea;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            color: #667eea;
+            margin-top: 10px;
+        }
+    </style>
 </head>
-<body class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
-  <div class="max-w-2xl mx-auto">
-    <!-- 헤더 -->
-    <header class="bg-white rounded-t-2xl shadow-lg p-6 mt-8">
-      <h1 class="text-3xl font-bold text-center text-indigo-900">에브라임 스터디카페</h1>
-      <p class="text-center text-gray-600 mt-2">직영점 문의 시스템</p>
-    </header>
-
-    <!-- 지점 선택 -->
-    <section id="page-branch" class="bg-white rounded-b-2xl shadow-lg p-6">
-      <h2 class="text-xl font-semibold text-gray-800 mb-4">직영점을 선택해주세요</h2>
-      <div class="space-y-3" role="list">
-        <button onclick="app.selectBranch('gyeyang','인천계양본점','🏢')" class="branch-btn" role="listitem">
-          <span class="text-lg font-medium">인천계양본점</span><span class="text-2xl" aria-hidden="true">🏢</span>
-        </button>
-        <button onclick="app.selectBranch('bakchon','인천박촌역점','🚇')" class="branch-btn" role="listitem">
-          <span class="text-lg font-medium">인천박촌역점</span><span class="text-2xl" aria-hidden="true">🚇</span>
-        </button>
-        <button onclick="app.selectBranch('bupyeong','부평삼산점','🏙️')" class="branch-btn" role="listitem">
-          <span class="text-lg font-medium">부평삼산점</span><span class="text-2xl" aria-hidden="true">🏙️</span>
-        </button>
-        <button onclick="app.selectBranch('sangdong','부천상동점','🏪')" class="branch-btn" role="listitem">
-          <span class="text-lg font-medium">부천상동점</span><span class="text-2xl" aria-hidden="true">🏪</span>
-        </button>
-        <button onclick="app.selectBranch('sinjung','부천신중동점','🏬')" class="branch-btn" role="listitem">
-          <span class="text-lg font-medium">부천신중동점</span><span class="text-2xl" aria-hidden="true">🏬</span>
-        </button>
-      </div>
-    </section>
-
-    <!-- 유형 선택 -->
-    <section id="page-type" class="bg-white rounded-b-2xl shadow-lg p-6 hidden">
-      <button onclick="app.goToPage('branch')" class="back-btn mb-4" aria-label="직영점 다시 선택">
-        <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-        </svg>직영점 다시 선택
-      </button>
-      <div class="bg-indigo-50 rounded-lg p-3 mb-4">
-        <p class="text-sm text-indigo-800">선택한 지점: <span id="selected-branch-name" class="font-semibold"></span></p>
-      </div>
-      <h2 class="text-xl font-semibold text-gray-800 mb-4">무엇을 도와드릴까요?</h2>
-      <div id="inquiry-types" class="space-y-3" role="list"></div>
-      <button onclick="app.goToPage('branch')" class="btn-secondary w-full mt-4">취소</button>
-    </section>
-
-    <!-- 주차 안내 (계양) -->
-    <section id="page-parking-info-gyeyang" class="bg-white rounded-b-2xl shadow-lg p-6 hidden">
-      <button onclick="app.goToPage('type')" class="back-btn mb-4" aria-label="뒤로가기">
-        <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-        </svg>뒤로가기
-      </button>
-      <div class="bg-blue-50 border-l-4 border-blue-500 p-6 rounded-lg" role="alert">
-        <div class="flex items-start">
-          <span class="text-4xl mr-4" aria-hidden="true">🅿️</span>
-          <div>
-            <h3 class="text-xl font-bold text-blue-900 mb-3">인천계양본점 주차 안내</h3>
-            <p class="text-gray-700 text-lg leading-relaxed">지하주차장이 있으나 협소하니 참고하시기 바랍니다.</p>
-          </div>
+<body>
+    <div class="container">
+        <!-- 1페이지: 지점 선택 -->
+        <div id="page1" class="page active">
+            <h1>에브라임 스터디카페</h1>
+            <h2>직영점 문의사항</h2>
+            <button class="btn" onclick="selectBranch('인천계양본점')">인천계양본점</button>
+            <button class="btn" onclick="selectBranch('인천박촌역점')">인천박촌역점</button>
+            <button class="btn" onclick="selectBranch('부천상동점')">부천상동점</button>
+            <button class="btn" onclick="selectBranch('부천신중동점')">부천신중동점</button>
+            <button class="btn" onclick="selectBranch('부평삼산점')">부평삼산점</button>
         </div>
-      </div>
-      <div class="flex gap-3 mt-6">
-        <button onclick="app.goToPage('type')" class="btn-secondary flex-1">취소</button>
-        <button onclick="app.goToPage('branch')" class="btn-primary flex-1">처음으로</button>
-      </div>
-    </section>
 
-    <!-- 주차 안내 (박촌) -->
-    <section id="page-parking-info-bakchon" class="bg-white rounded-b-2xl shadow-lg p-6 hidden">
-      <button onclick="app.goToPage('type')" class="back-btn mb-4" aria-label="뒤로가기">
-        <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-        </svg>뒤로가기
-      </button>
-      <div class="bg-blue-50 border-l-4 border-blue-500 p-6 rounded-lg" role="alert">
-        <div class="flex items-start">
-          <span class="text-4xl mr-4" aria-hidden="true">🅿️</span>
-          <div>
-            <h3 class="text-xl font-bold text-blue-900 mb-3">인천박촌역점 주차 안내</h3>
-            <p class="text-gray-700 text-lg leading-relaxed">뒷편에 주차장이 있으나 협소하니 참고하시기 바랍니다.</p>
-          </div>
+        <!-- 2페이지: 문의 유형 선택 -->
+        <div id="page2" class="page">
+            <h2 id="selectedBranch"></h2>
+            <button class="btn" onclick="selectInquiryType('스터디룸 예약')">스터디룸 예약</button>
+            <button class="btn" onclick="selectInquiryType('학습방해행위 신고')">학습방해행위 신고</button>
+            <button class="btn" onclick="selectInquiryType('온도조절문의')">온도조절문의</button>
+            <button class="btn" onclick="showParkingNotice()">주차안내</button>
+            <button class="btn" onclick="selectInquiryType('기타 문의')">그 외 기타 문의</button>
+            <button class="btn back-btn" onclick="goToPage(1)">이전</button>
         </div>
-      </div>
-      <div class="flex gap-3 mt-6">
-        <button onclick="app.goToPage('type')" class="btn-secondary flex-1">취소</button>
-        <button onclick="app.goToPage('branch')" class="btn-primary flex-1">처음으로</button>
-      </div>
-    </section>
 
-    <!-- 주차 안내 (부평) -->
-    <section id="page-parking-info-bupyeong" class="bg-white rounded-b-2xl shadow-lg p-6 hidden">
-      <button onclick="app.goToPage('type')" class="back-btn mb-4" aria-label="뒤로가기">
-        <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-        </svg>뒤로가기
-      </button>
-      <div class="bg-blue-50 border-l-4 border-blue-500 p-6 rounded-lg" role="alert">
-        <div class="flex items-start">
-          <span class="text-4xl mr-4" aria-hidden="true">🅿️</span>
-          <div>
-            <h3 class="text-xl font-bold text-blue-900 mb-3">부평삼산점 주차 안내</h3>
-            <p class="text-gray-700 text-lg leading-relaxed">아파트 상가에 주차가 가능하지만, 불가한 경우도 있으니 참고 바랍니다.</p>
-          </div>
+        <!-- 3페이지: 문의 내용 작성 -->
+        <div id="page3" class="page">
+            <h2 id="inquiryTypeTitle"></h2>
+            <form id="inquiryForm">
+                <div class="form-group">
+                    <label for="seatNumber">좌석 번호</label>
+                    <input type="text" id="seatNumber" placeholder="예: A-12" required>
+                </div>
+                <div class="form-group">
+                    <label for="inquiryContent">문의 사항</label>
+                    <textarea id="inquiryContent" placeholder="문의하실 내용을 상세히 적어주세요" required></textarea>
+                </div>
+                <button type="submit" class="btn">문의 제출</button>
+                <div class="loading" id="loading">전송 중...</div>
+                <button type="button" class="btn back-btn" onclick="goToPage(2)">이전</button>
+            </form>
         </div>
-      </div>
-      <div class="flex gap-3 mt-6">
-        <button onclick="app.goToPage('type')" class="btn-secondary flex-1">취소</button>
-        <button onclick="app.goToPage('branch')" class="btn-primary flex-1">처음으로</button>
-      </div>
-    </section>
 
-    <!-- 문의 폼 -->
-    <section id="page-form" class="bg-white rounded-b-2xl shadow-lg p-6 hidden">
-      <button onclick="app.goToPage('type')" class="back-btn mb-4" aria-label="문의 유형 다시 선택">
-        <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-        </svg>문의 유형 다시 선택
-      </button>
-      <div class="bg-indigo-50 rounded-lg p-3 mb-4 space-y-1">
-        <p class="text-sm text-indigo-800">지점: <span id="form-branch-name" class="font-semibold"></span></p>
-        <p class="text-sm text-indigo-800">문의 유형: <span id="form-type-name" class="font-semibold"></span></p>
-      </div>
-      <h2 class="text-xl font-semibold text-gray-800 mb-4">
-        <span id="form-type-icon" aria-hidden="true"></span> <span id="form-type-title"></span>
-      </h2>
-      <form id="inquiry-form" class="space-y-4" onsubmit="event.preventDefault(); app.submitInquiry();">
-        <div>
-          <label for="seat-number" class="block text-sm font-medium text-gray-700 mb-2">좌석 번호 <span class="text-red-500">*</span></label>
-          <input type="number" id="seat-number" name="seatNumber" inputmode="numeric" min="1" max="500" placeholder="예: 42" class="input" required aria-required="true" aria-describedby="seat-help" />
-          <p id="seat-help" class="text-xs text-gray-500 mt-1">1~500 사이 숫자</p>
+        <!-- 4페이지: 완료 메시지 -->
+        <div id="page4" class="page">
+            <div class="success-message">
+                <h2>문의가 접수되었습니다</h2>
+                <p>최대한 빠르게 문의사항을 해결해드리도록 하겠습니다.</p>
+                <div class="phone-list">
+                    <div class="phone-item">
+                        <strong>인천계양본점</strong><br>
+                        032-123-4567
+                    </div>
+                    <div class="phone-item">
+                        <strong>인천박촌역점</strong><br>
+                        032-234-5678
+                    </div>
+                    <div class="phone-item">
+                        <strong>부천상동점</strong><br>
+                        032-345-6789
+                    </div>
+                    <div class="phone-item">
+                        <strong>부천신중동점</strong><br>
+                        032-456-7890
+                    </div>
+                    <div class="phone-item">
+                        <strong>부평삼산점</strong><br>
+                        032-567-8901
+                    </div>
+                </div>
+                <button class="btn" onclick="goToPage(1); resetForm();">처음으로</button>
+            </div>
         </div>
-        <div>
-          <label for="inquiry-content" class="block text-sm font-medium text-gray-700 mb-2">문의 내용 <span class="text-red-500">*</span></label>
-          <textarea id="inquiry-content" name="content" rows="6" maxlength="1000" placeholder="문의하실 내용을 상세히 입력해주세요 (최대 1000자)" class="input resize-none" required aria-required="true" aria-describedby="content-help"></textarea>
-          <p id="content-help" class="text-xs text-gray-500 mt-1"><span id="content-count">0</span>/1000</p>
+
+        <!-- 5페이지: 주차안내 공지 -->
+        <div id="page5" class="page">
+            <h2 id="parkingBranchTitle"></h2>
+            <div class="success-message">
+                <div class="phone-list">
+                    <div class="phone-item" style="border: none; padding: 20px;">
+                        <p id="parkingNoticeContent" style="line-height: 1.8; color: #333; font-size: 16px; white-space: pre-line;"></p>
+                    </div>
+                </div>
+                <button class="btn" onclick="goToPage(2)">이전</button>
+                <button class="btn back-btn" onclick="goToPage(1)">처음으로</button>
+            </div>
         </div>
-        <div id="live-region" class="sr-only" aria-live="polite" aria-atomic="true"></div>
-        <div id="error-message" class="hidden" role="alert"></div>
-        <div id="success-message" class="hidden" role="alert"></div>
-        <button id="submit-button" type="submit" class="btn-primary w-full">
-          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
-          </svg>
-          문의하기
-        </button>
-        <button type="button" onclick="app.goToPage('type')" class="btn-secondary w-full">취소</button>
-      </form>
+    </div>
 
-      <!-- 진단 배너 (API 불가 시 표시) -->
-      <div id="diagnostic-banner" class="hidden mt-4 text-sm text-yellow-900 bg-yellow-50 border border-yellow-200 rounded-lg p-3"></div>
+    <script>
+        let selectedBranch = '';
+        let selectedInquiryType = '';
 
-      <!-- 도움말: 토큰/Chat ID 얻는 법 -->
-      <details class="mt-6">
-        <summary class="text-sm text-gray-600">텔레그램 토큰/Chat ID 얻는 법 (펼치기)</summary>
-        <div class="text-sm text-gray-700 mt-2 space-y-2">
-          <p>1) 텔레그램에서 <b>@BotFather</b> 대화 → <code>/newbot</code> → 이름/username 설정 → <b>Bot Token</b> 획득</p>
-          <p>2) <b>개인으로 받기</b>: 봇과 1:1 채팅에서 “Start” 누른 후 브라우저에서
-            <code>https://api.telegram.org/bot&lt;TOKEN&gt;/getUpdates</code> 열기 → <code>result[].message.chat.id</code> 숫자 사용</p>
-          <p>3) <b>그룹으로 받기</b>: 봇을 그룹에 초대하고 아무 메시지 전송 → 위 주소로 확인 → <code>chat.id = -100...</code> 형태 사용</p>
-          <p>4) Vercel → 프로젝트 → Settings → <b>Environment Variables</b>에
-            <code>TELEGRAM_BOT_TOKEN</code>, <code>TELEGRAM_CHAT_ID</code> 등록 후 <b>Redeploy</b></p>
-        </div>
-      </details>
-    </section>
+        const parkingInfo = {
+            '인천계양본점': '지하주차장이 있지만 협소하기에 참고하시기 바랍니다',
+            '인천박촌역점': '카페 뒤편에 주차장소가 있지만 매우 협소하기에 참고하시기 바랍니다',
+            '부천상동점': '지하 주차장은 무료(들어가기 매우 협소), 카페 옆 공영주차장은 사이드부분만 무료이니 참고해주시기 바랍니다.',
+            '부천신중동점': '주차가 불가하니 참고해주시기 바랍니다.',
+            '부평삼산점': '아파트 주차장이 있으나 이용하기 어려울 때가 있으니 참고해주시기 바랍니다'
+        };
 
-    <!-- 푸터 -->
-    <footer class="text-center mt-6 text-gray-600 text-sm">
-      <p>문의하신 내용은 실시간으로 관리자에게 전달됩니다</p>
-      <p class="mt-1">빠른 시일 내에 답변드리겠습니다 😊</p>
-    </footer>
-  </div>
+        function goToPage(pageNum) {
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+            document.getElementById('page' + pageNum).classList.add('active');
+        }
 
-  <!-- ===== API 유틸 (데모 폴백 포함) ===== -->
-  <script>
-  const API = (() => {
-    const isLocal = ['localhost','127.0.0.1'].includes(location.hostname);
-    const isFile = location.protocol === 'file:';
-    const isPages = /github\.io$/.test(location.hostname);
-    // 같은 도메인에 API가 있을 때는 빈 문자열 유지. 별도 도메인이면 아래 BASE를 수정하세요.
-    const BASE = '';
+        function selectBranch(branch) {
+            selectedBranch = branch;
+            document.getElementById('selectedBranch').textContent = branch;
+            goToPage(2);
+        }
 
-    function allowDemo(){
-      // 로컬/파일/깃허브Pages 환경에선 API가 없을 수 있으므로 데모 허용
-      return isLocal || isFile || isPages;
-    }
+        function selectInquiryType(type) {
+            selectedInquiryType = type;
+            document.getElementById('inquiryTypeTitle').textContent = `${selectedBranch} - ${type}`;
+            document.getElementById('inquiryContent').value = '';
+            goToPage(3);
+        }
 
-    async function post(path, body, opts = {}){
-      const { timeout = 10000, captchaToken } = opts;
-      const ctrl = new AbortController();
-      const id = setTimeout(() => ctrl.abort('timeout'), timeout);
+        function showParkingNotice() {
+            const info = parkingInfo[selectedBranch];
+            document.getElementById('parkingBranchTitle').textContent = `${selectedBranch} 주차 안내`;
+            document.getElementById('parkingNoticeContent').textContent = info;
+            goToPage(5);
+        }
 
-      const headers = {
-        'Content-Type': 'application/json',
-        'X-Requested-With': 'XMLHttpRequest'
-      };
-      if (captchaToken) headers['X-Captcha-Token'] = captchaToken;
+        function resetForm() {
+            document.getElementById('inquiryForm').reset();
+            document.getElementById('inquiryContent').value = '';
+            selectedBranch = '';
+            selectedInquiryType = '';
+        }
 
-      try{
-        const res = await fetch(`${BASE}${path}`,{
-          method:'POST', headers, body: JSON.stringify(body), signal: ctrl.signal, credentials: 'same-origin'
+        document.getElementById('inquiryForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const seatNumber = document.getElementById('seatNumber').value;
+            const inquiryContent = document.getElementById('inquiryContent').value;
+            const loading = document.getElementById('loading');
+            
+            const message = `🔔 새로운 문의가 접수되었습니다\n\n` +
+                          `🏢 지점: ${selectedBranch}\n` +
+                          `📋 문의 유형: ${selectedInquiryType}\n` +
+                          `💺 좌석 번호: ${seatNumber}\n\n` +
+                          `📝 문의 내용:\n${inquiryContent}`;
+            
+            loading.style.display = 'block';
+            
+            try {
+                const response = await fetch('/api/sendMessage', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ message })
+                });
+
+                if (response.ok) {
+                    goToPage(4);
+                } else {
+                    alert('문의 전송에 실패했습니다. 다시 시도해주세요.');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('문의 전송 중 오류가 발생했습니다. 다시 시도해주세요.');
+            } finally {
+                loading.style.display = 'none';
+            }
         });
-        clearTimeout(id);
-        let data = null; try{ data = await res.json(); }catch(_){ }
-        if(!res.ok){ const msg = data?.message || `서버 오류 (${res.status})`; const err = new Error(msg); err.status = res.status; err.payload = data; throw err; }
-        return data;
-      }catch(err){
-        clearTimeout(id);
-        // 네트워크/접근 불가 시 데모 모드
-        if (allowDemo()) {
-          console.warn('API unreachable, falling back to DEMO mode. Error:', err);
-          return { ok: true, _demo: true };
-        }
-        throw err;
-      }
-    }
-
-    // 노출: 테스트 헬퍼 포함
-    return { post, isLocal, __test:{ allowDemo } };
-  })();
-  </script>
-
-  <!-- ===== 앱 코드 ===== -->
-  <script>
-  const app = (() => {
-    const CSS = {
-      primary: 'w-full p-4 bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white rounded-xl shadow-md transition-all transform hover:scale-105 flex items-center justify-between focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2',
-      btnPrimary: 'btn-primary bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white font-semibold py-3 px-6 rounded-lg shadow-md transition-all flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2',
-      btnSecondary: 'btn-secondary bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold py-3 px-6 rounded-lg shadow-md transition-all focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2',
-      backBtn: 'back-btn flex items-center text-indigo-600 hover:text-indigo-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 rounded',
-      input: 'input w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all',
-      alertErr: 'bg-red-50 border border-red-200 rounded-lg p-3 flex items-center text-red-700',
-      alertOk: 'bg-green-50 border border-green-200 rounded-lg p-3 flex items-center text-green-700'
-    };
-
-    const TYPES = [
-      { id: 'room', title: '스터디룸 예약', icon: '📅' },
-      { id: 'report', title: '학습 방해 행위 신고', icon: '🚨' },
-      { id: 'parking', title: '주차 문의', icon: '🚗', excludeBranches: ['bupyeong','gyeyang','bakchon'] },
-      { id: 'parking_info_gyeyang', title: '주차 안내', icon: '🅿️', onlyBranches: ['gyeyang'], isInfo: true, infoPage: 'parking-info-gyeyang' },
-      { id: 'parking_info_bakchon', title: '주차 안내', icon: '🅿️', onlyBranches: ['bakchon'], isInfo: true, infoPage: 'parking-info-bakchon' },
-      { id: 'parking_info_bupyeong', title: '주차 안내', icon: '🅿️', onlyBranches: ['bupyeong'], isInfo: true, infoPage: 'parking-info-bupyeong' },
-      { id: 'temperature', title: '온도 조절 문의', icon: '🌡️' },
-      { id: 'other', title: '그 외 기타 문의', icon: '💬' }
-    ];
-
-    const state = { selectedBranch: '', selectedBranchName: '', selectedType: '', selectedTypeName: '', selectedTypeIcon: '', isSubmitting: false };
-
-    const el = { pages:{}, form:{ seat:null, content:null, count:null, btn:null }, msg:{ err:null, errText:null, ok:null, live:null }, diag:null };
-
-    function init(){ cache(); style(); listen(); maybeShowDiagnostics(); }
-
-    function cache(){
-      el.pages = {
-        branch: document.getElementById('page-branch'),
-        type: document.getElementById('page-type'),
-        form: document.getElementById('page-form'),
-        parkingInfoGyeyang: document.getElementById('page-parking-info-gyeyang'),
-        parkingInfoBakchon: document.getElementById('page-parking-info-bakchon'),
-        parkingInfoBupyeong: document.getElementById('page-parking-info-bupyeong')
-      };
-      el.form = {
-        seat: document.getElementById('seat-number'),
-        content: document.getElementById('inquiry-content'),
-        count: document.getElementById('content-count'),
-        btn: document.getElementById('submit-button')
-      };
-      el.msg = {
-        err: document.getElementById('error-message'),
-        errText: document.getElementById('error-text') || (()=>{
-          const s=document.createElement('span'); s.id='error-text';
-          el.msg.err?.appendChild(s); return s;
-        })(),
-        ok: document.getElementById('success-message'),
-        live: document.getElementById('live-region')
-      };
-      el.diag = document.getElementById('diagnostic-banner');
-    }
-
-    function style(){
-      document.querySelectorAll('.branch-btn').forEach(b=> b.className = CSS.primary);
-      document.querySelectorAll('.btn-primary').forEach(b=> b.className = CSS.btnPrimary);
-      document.querySelectorAll('.btn-secondary').forEach(b=> b.className = CSS.btnSecondary);
-      document.querySelectorAll('.back-btn').forEach(b=> b.className = CSS.backBtn);
-      document.querySelectorAll('.input').forEach(i=> i.className = CSS.input);
-      if(el.msg.err) el.msg.err.className = CSS.alertErr + ' hidden';
-      if(el.msg.ok) el.msg.ok.className   = CSS.alertOk  + ' hidden';
-    }
-
-    function listen(){
-      if(el.form.content) el.form.content.addEventListener('input', updateCounter);
-      document.addEventListener('keydown', (e)=>{
-        if(e.key==='Escape'){
-          const p = currentPage();
-          if(p==='type') goToPage('branch');
-          else if(['form','parkingInfoGyeyang','parkingInfoBakchon','parkingInfoBupyeong'].includes(p)) goToPage('type');
-        }
-      });
-    }
-
-    function maybeShowDiagnostics(){
-      const url = new URL(location.href);
-      if (url.searchParams.get('debug') === '1' && el.diag) {
-        el.diag.classList.remove('hidden');
-        el.diag.innerHTML = `🔧 진단 모드: API 연결 확인 중...<br>
-          host=<b>${location.host}</b>, isLocal=${API.isLocal}, file=${location.protocol==='file:'}, pages=${/github\\.io$/.test(location.hostname)}<br>
-          API_BASE=''`;
-      }
-    }
-
-    function currentPage(){ for(const [k,v] of Object.entries(el.pages)){ if(v && !v.classList.contains('hidden')) return k; } return null; }
-
-    function goToPage(page){
-      Object.values(el.pages).forEach(x=> x?.classList.add('hidden'));
-      if(page==='branch'){ el.pages.branch?.classList.remove('hidden'); resetState(); }
-      else if(page==='type'){ el.pages.type?.classList.remove('hidden'); resetForm(); }
-      else if(page==='form'){ el.pages.form?.classList.remove('hidden'); setTimeout(()=> el.form.seat?.focus(), 100); }
-      else if(page==='parking-info-gyeyang'){ el.pages.parkingInfoGyeyang?.classList.remove('hidden'); }
-      else if(page==='parking-info-bakchon'){ el.pages.parkingInfoBakchon?.classList.remove('hidden'); }
-      else if(page==='parking-info-bupyeong'){ el.pages.parkingInfoBupyeong?.classList.remove('hidden'); }
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-
-    function resetState(){ state.selectedBranch=''; state.selectedBranchName=''; state.selectedType=''; state.selectedTypeName=''; state.selectedTypeIcon=''; }
-
-    function resetForm(){
-      if(el.form.seat) el.form.seat.value='';
-      if(el.form.content){ el.form.content.value=''; updateCounter(); }
-      hide(el.msg.err); hide(el.msg.ok);
-    }
-
-    function selectBranch(id, name, icon){
-      state.selectedBranch=id; state.selectedBranchName=name;
-      const n = document.getElementById('selected-branch-name'); if(n) n.textContent = name;
-      renderTypes(id); goToPage('type');
-    }
-
-    function renderTypes(branchId){
-      const c = document.getElementById('inquiry-types'); if(!c) return;
-      c.innerHTML='';
-      TYPES.forEach(t=>{
-        if(t.excludeBranches?.includes(branchId)) return;
-        if(t.onlyBranches && !t.onlyBranches.includes(branchId)) return;
-        const b=document.createElement('button');
-        b.className=CSS.primary; b.type='button'; b.setAttribute('role','listitem'); b.setAttribute('aria-label', t.title);
-        b.innerHTML = `<span class="text-lg font-medium">${t.title}</span><span class="text-2xl" aria-hidden="true">${t.icon}</span>`;
-        b.onclick = t.isInfo ? ()=> goToPage(t.infoPage) : ()=> selectType(t.id, t.title, t.icon);
-        c.appendChild(b);
-      });
-    }
-
-    function selectType(id,title,icon){
-      state.selectedType=id; state.selectedTypeName=title; state.selectedTypeIcon=icon;
-      document.getElementById('form-branch-name').textContent = state.selectedBranchName;
-      document.getElementById('form-type-name').textContent = title;
-      document.getElementById('form-type-icon').textContent = icon;
-      document.getElementById('form-type-title').textContent = title;
-      goToPage('form');
-    }
-
-    function updateCounter(){ if(el.form.content && el.form.count) el.form.count.textContent = el.form.content.value.length; }
-
-    function show(x,msg){
-      if(!x) return; x.classList.remove('hidden');
-      if(msg && x===el.msg.err && el.msg.errText) el.msg.errText.textContent = msg;
-      if(el.msg.live) el.msg.live.textContent = x===el.msg.err ? `오류: ${msg||'문제가 발생했습니다.'}` : '문의가 성공적으로 접수되었습니다.';
-    }
-    function hide(x){ if(x) x.classList.add('hidden'); }
-
-    function validate(seat, content){
-      if(!Number.isInteger(seat) || seat<1 || seat>500) return {ok:false, msg:'좌석 번호는 1~500 사이의 숫자여야 합니다.', field:'seat'};
-      if(content.length<5) return {ok:false, msg:'문의 내용은 최소 5자 이상 입력해주세요.', field:'content'};
-      if(content.length>1000) return {ok:false, msg:'문의 내용은 최대 1000자까지 가능합니다.', field:'content'};
-      return {ok:true};
-    }
-
-    async function submitInquiry(){
-      if(state.isSubmitting) return;
-      hide(el.msg.err); hide(el.msg.ok);
-
-      const seat = Number(el.form.seat?.value);
-      const content = el.form.content?.value.trim() || '';
-      const v = validate(seat, content);
-      if(!v.ok){ show(el.msg.err, v.msg); (v.field==='seat'?el.form.seat:el.form.content)?.focus(); return; }
-
-      state.isSubmitting = true;
-      const original = el.form.btn.innerHTML;
-      el.form.btn.disabled = true;
-      el.form.btn.innerHTML = '<span class="inline-block animate-spin mr-2">⏳</span>전송 중...';
-
-      const payload = {
-        branchId: state.selectedBranch,
-        branchName: state.selectedBranchName,
-        typeId: state.selectedType,
-        typeName: state.selectedTypeName,
-        typeIcon: state.selectedTypeIcon,
-        seatNumber: seat,
-        content,
-        timestamp: new Date().toISOString()
-      };
-
-      try{
-        const result = await API.post('/api/inquiry', payload, { timeout: 12000 });
-        if (result && result._demo && document.getElementById('diagnostic-banner')) {
-          const b = document.getElementById('diagnostic-banner');
-          b.classList.remove('hidden');
-          b.innerHTML = '⚠️ 현재 환경에서 API에 접속할 수 없어 <b>데모 모드</b>로 처리했습니다. 실제 전송을 원하시면 백엔드를 배포하고 API 경로를 연결해주세요.';
-        }
-        show(el.msg.ok); setTimeout(()=> goToPage('branch'), 1500);
-      }catch(e){
-        console.error('❌ /api/inquiry 실패:', e);
-        show(el.msg.err, e.message || '문의 접수에 실패했습니다. 잠시 후 다시 시도해주세요.');
-      }finally{
-        state.isSubmitting=false;
-        el.form.btn.disabled=false;
-        el.form.btn.innerHTML=original;
-      }
-    }
-
-    // 간단 테스트 (URL에 ?debug=1 붙이면 실행)
-    function runTests(){
-      const cases = [
-        { name:'seat too small', seat:0, content:'hello world', want:false },
-        { name:'seat ok, content too short', seat:10, content:'hey', want:false },
-        { name:'seat ok, content max ok', seat:500, content:'x'.repeat(1000), want:true },
-        { name:'seat ok, content ok', seat:1, content:'문의내용 충분', want:true },
-      ];
-      console.group('%c[TEST] validate()', 'color:#6b21a8');
-      cases.forEach(tc=>{ const got = validate(tc.seat, tc.content).ok; console.assert(got===tc.want, tc.name, {got, want:tc.want}); });
-      console.groupEnd();
-
-      console.group('%c[TEST] allowDemo()', 'color:#6b21a8');
-      console.assert(API.__test.allowDemo('localhost')===true, 'localhost allowed');
-      console.assert(API.__test.allowDemo('127.0.0.1')===true, '127.0.0.1 allowed');
-      console.groupEnd();
-
-      console.info('%c테스트 완료. 실패 항목이 보인다면 메시지를 확인하세요.', 'color:#065f46');
-    }
-
-    return { init, goToPage, selectBranch, selectType, submitInquiry, runTests };
-  })();
-
-  // 초기화
-  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', app.init); else app.init();
-
-  // 자동 테스트 실행 (?debug=1)
-  (function(){ try{ if(new URL(location.href).searchParams.get('debug')==='1'){ app.runTests(); } }catch(e){} })();
-  </script>
+    </script>
 </body>
 </html>
